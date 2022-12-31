@@ -9,18 +9,20 @@
     --grid-color: black;
     --square-bg-color: #dedede;
     --square-bg-color-hover: #f79883;
+    --btn-bg-color: #f79883;
+    --btn-bg-color-hover: #dd6c52;
 }
 
 .body {
     min-height: 100vh;
-    border: 1px solid blue;
+    background-color: #f0f0f0;
+
 }
 
 .gameboard-container {
-    height: 100vh;
+    height: calc(80vh);
     display: grid;
     place-items: center;
-    border: 1px solid red;
 }
 
 .gameboard {
@@ -43,4 +45,23 @@
 .square:hover {
     transform: scale(1.05);
     background-color: var(--square-bg-color-hover);
+}
+
+.display {
+    height: 50px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 0px solid gray;
+    background-color: var(--btn-bg-color);
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--btn-bg-color-hover);
 }
