@@ -25,6 +25,20 @@
     place-items: center;
 }
 
+.scores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 300px;
+    justify-items: center;
+}
+
+.player {
+    display: grid;
+    white-space: nowrap;
+    grid-template-columns: min-content min-content;
+    gap:7px;
+}
+
 .gameboard {
     display: grid;
     grid-template-columns: repeat(3, 100px);
