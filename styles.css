@@ -8,21 +8,51 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     --grid-color: black;
     --square-bg-color: #dedede;
-    --square-bg-color-hover: #f79883;
+    --square-font-color: #333333;
+    --square-bg-color-hover: #f8ac86;
+    --square-font-color-hover: #b63f03;
+    --square-bg-color-win: #cddd52;
+    --square-font-color-win: #5b6700;
     --btn-bg-color: #f79883;
+    --btn-font-color: #661706;
     --btn-bg-color-hover: #dd6c52;
+    --btn-font-color-hover: #661706;
 }
 
 .body {
     min-height: 100vh;
     background-color: #f0f0f0;
+}
 
+h1 {
+    font-size: 3rem;
 }
 
 .gameboard-container {
-    height: calc(80vh);
+    min-height: 80vh;
     display: grid;
     place-items: center;
+    padding: 30px;
+}
+
+#bot-level {  /* Reset. */
+    border: unset;
+  
+    /* Style */
+    max-width: 400px;
+    padding: 0.75rem;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-left: 5px;
+    margin-top: 20px;
+  
+    /* Arrow */
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem top 50%;
+    background-size: 0.65rem auto;
 }
 
 .scores {
@@ -30,6 +60,7 @@
     grid-template-columns: 1fr 1fr;
     width: 300px;
     justify-items: center;
+    margin-block: 20px;
 }
 
 .player {
@@ -37,6 +68,13 @@
     white-space: nowrap;
     grid-template-columns: min-content min-content;
     gap:7px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+.player div:nth-child(even) {
+    color: var(--square-bg-color-hover);
+}.player div:nth-child(odd) {
+    color: #666;
 }
 
 .gameboard {
@@ -55,27 +93,56 @@
     display: grid;
     place-items: center;
     font-size: 3rem;
+    font-weight: 800;
+    color: var(--square-font-color);
+    text-transform: capitalize;
 }
 .square:hover {
-    transform: scale(1.05);
+    transform: scale(1.05) !important;
+    transition: cubic-bezier(0.785, 0.135, 0.15, 0.86), 200ms !important;
     background-color: var(--square-bg-color-hover);
+    color: var(--square-font-color-hover);
+}
+
+.square-win {
+    background-color: var(--square-bg-color-win) !important;
+    transition: 1s;
+    animation: grow 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    color: var(--square-font-color-win) !important;
+}
+
+@keyframes grow {
+    0% {transform: scale(1);}
+    50% {transform: scale(1.1);}
+    100% {transform: scale(1);}
 }
 
 .display {
-    height: 50px;
+    height: 80px;
     font-size: 2rem;
+    font-weight: 800;
     text-align: center;
+    display: grid;
+    place-items: center;
 }
 
 button {
-    padding: 10px 20px;
-    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 20px;
+    font-size: 1.4rem;
+    font-weight: 600;
     border-radius: 10px;
     border: 0px solid gray;
     background-color: var(--btn-bg-color);
+    color: var(--btn-font-color);
     cursor: pointer;
+    width: 320px;
 }
 
 button:hover {
     background-color: var(--btn-bg-color-hover);
+    color: var(--btn-font-color-hover);
 }

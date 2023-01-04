@@ -18,10 +18,12 @@ const p1 = new Player('Player 1');
 const bot = new Player('Bot');
 
 
+
 // gameboard
 const gameboard = (() => {
     const _arr = ['','','','','','','','',''];
     const _squares = document.querySelectorAll('.square');
+    let _winningSquares = [];
 
     // initiate squares - each square div contains a data-index attribute
     _squares.forEach((square) => {
@@ -56,10 +58,22 @@ const gameboard = (() => {
         }
         _squares.forEach(square => {
             square.textContent = '';
+            square.classList.remove('square-win');
         })
     };
+    const setWinningSquares = (winningIndexArr) => {
+        _winningSquares = winningIndexArr.sort();
+    };
+    const animateSquares = () => {
+        console.log(_squares[_winningSquares[0]]);
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                _squares[_winningSquares[i]].classList.add('square-win');
+            }, 100 * i);
+        }
+    };
 
-    return {getSquare, setSquare, getArray, getMoves, clear};
+    return {getSquare, setSquare, getArray, getMoves, setWinningSquares, animateSquares, clear};
 })();
 
 
@@ -73,7 +87,7 @@ const game = (() => {
     let _isGameOver = false;
     let _botLevel = 'very easy';
 
-    // get & set bot level
+    // check if bot level stored locally
     if (localStorage.getItem('botLevel')) {
         _botLevel = localStorage.getItem('botLevel');
         _botLevelSelect.value = _botLevel;
@@ -94,7 +108,8 @@ const game = (() => {
         // display winner
         if (checkForWinner(gameboard.getArray(), game.getSymbol())) {
             _isGameOver = true;
-            display.show(`${_currentPlayer.getName()} (${_currentSymbol}) wins!`);
+            display.show(`${_currentPlayer.getName()} wins!`);
+            gameboard.animateSquares();
             _currentPlayer.increaseScore();
             display.updateScores();
         } else if (checkForWinner(gameboard.getArray(), game.getSymbol()) === false) {
@@ -140,20 +155,24 @@ function checkForWinner(arr, symbol) {
     for (let i = 0; i < 9; i++) {
         // check horizontal lines
         if (i % 3 === 0 && arr[i] === symbol && arr[i+1] === symbol && arr[i+2] === symbol) {
+            gameboard.setWinningSquares([i, i+1, i+2]);
             return true;
         }
         // check vertical lines
         if (i < 3 && arr[i] === symbol && arr[i+3] === symbol && arr[i+6] === symbol) {
+            gameboard.setWinningSquares([i, i+3, i+6]);
             return true;
         }
         // check diagonal lines
         if (i === 4) {
             // from top-left
             if (arr[i] === symbol && arr[i-4] === symbol && arr[i+4] === symbol) {
+                gameboard.setWinningSquares([i, i-4, i+4]);
                 return true;
             }
             // from top-right
             if (arr[i] === symbol && arr[i-2] === symbol && arr[i+2] === symbol) {
+                gameboard.setWinningSquares([i, i-2, i+2]);
                 return true;
             }
         }
@@ -165,6 +184,7 @@ function checkForWinner(arr, symbol) {
         return false;
     }
 }
+
 
 
 // displayController
@@ -190,7 +210,6 @@ const display = (() => {
 
 
 // BOT MOVES
-
 const botMove = (() => {
     const _chooseRandomSquare = () => {
         // get possible moves
