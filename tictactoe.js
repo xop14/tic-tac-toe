@@ -65,7 +65,6 @@ const gameboard = (() => {
         _winningSquares = winningIndexArr.sort();
     };
     const animateSquares = () => {
-        console.log(_squares[_winningSquares[0]]);
         for (let i = 0; i < 3; i++) {
             setTimeout(() => {
                 _squares[_winningSquares[i]].classList.add('square-win');
@@ -85,7 +84,8 @@ const game = (() => {
     let _currentSymbol = 'x';
     let _currentPlayer = p1;
     let _isGameOver = false;
-    let _botLevel = 'very easy';
+    let _botLevel = 'easy';
+    _botLevelSelect.value = _botLevel;
 
     // check if bot level stored locally
     if (localStorage.getItem('botLevel')) {
@@ -96,7 +96,6 @@ const game = (() => {
     _botLevelSelect.addEventListener('input', () => {
         _botLevel = _botLevelSelect.value;
         localStorage.setItem('botLevel', _botLevel);
-        console.log(_botLevel);
     });
 
 
@@ -113,7 +112,7 @@ const game = (() => {
             _currentPlayer.increaseScore();
             display.updateScores();
         } else if (checkForWinner(gameboard.getArray(), game.getSymbol()) === false) {
-            display.show('game tied');
+            display.show("It's a tie...");
         } else {
             _currentSymbol = _currentSymbol === 'x' ? 'o' : 'x';
             _currentPlayer = _currentPlayer === p1 ? bot : p1;
@@ -121,7 +120,9 @@ const game = (() => {
 
         // initiate bot move
         if (_currentPlayer === bot && _isGameOver === false) {
-            if (_botLevel === 'hard') {
+            if (_botLevel === 'impossible') {
+                setTimeout(botMove.impossible, 200);
+            } else if (_botLevel === 'hard') {
                 setTimeout(botMove.hard, 200);
             } else if (_botLevel === 'medium') {
                 setTimeout(botMove.medium, 200);
@@ -140,7 +141,6 @@ const game = (() => {
         _currentPlayer = p1;
         _currentSymbol = 'x';
         _isGameOver = false;
-        console.log('restarted');
     }
 
     return {getSymbol, nextTurn, getGameOverStatus};
@@ -195,6 +195,15 @@ const display = (() => {
 
     const show = (message) => {
         _display.textContent = message;
+        let interval = 500;
+        // set shorter interval time if tie
+        if (message.includes('tie')) {
+            interval = 200;
+        }
+        setTimeout(() => {
+            _display.style.transitionDuration = '0.3s';
+            _display.style.opacity = '1';
+        }, interval)
     }
     const updateScores = () => {
         _p1Score.textContent = p1.getScore();
@@ -202,6 +211,8 @@ const display = (() => {
     }
     const clear = () => {
         _display.textContent = '';
+        _display.style.transitionDuration = '0s';
+        _display.style.opacity = '0';
     }
 
     return {show, updateScores, clear};
@@ -218,35 +229,54 @@ const botMove = (() => {
         gameboard.setSquare(freeSpaces[randomIndex], game.getSymbol());
     }
 
+    // check if bot can win on next move and go there
+    const _attemptWin = () => {
+        // get possible moves
+        const freeSpaces = gameboard.getMoves();
+        for (let i = 0; i < freeSpaces.length; i++) {
+            // clone current game array
+            const tempArr = [...gameboard.getArray()];
+            tempArr[freeSpaces[i]] = 'o';
+            // if o could win, go there
+            if (checkForWinner(tempArr, 'o')) {
+                gameboard.setSquare(freeSpaces[i], 'o');
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // check if player can win on next move and block them
+    const _attemptBlock = () => {
+        // get possible moves
+        const freeSpaces = gameboard.getMoves();
+        for (let i = 0; i < freeSpaces.length; i++) {
+            // clone current game array
+            const tempArr = [...gameboard.getArray()];
+            tempArr[freeSpaces[i]] = 'x';
+            // if p1 could win, block them
+            if (checkForWinner(tempArr, 'x')) {
+                gameboard.setSquare(freeSpaces[i], 'o');
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // bot levels
     const veryEasy = () => {
         // get possible moves
         const freeSpaces = gameboard.getMoves();
     
         // choose random space
-        const randomSpace = Math.floor(Math.random()*freeSpaces.length);
-        const botChoice = freeSpaces[randomSpace];
+        const randomIndex = Math.floor(Math.random()*freeSpaces.length);
+        const botChoice = freeSpaces[randomIndex];
         gameboard.setSquare(botChoice, game.getSymbol());
         game.nextTurn();
     };
 
     const easy = () => {
-        // get possible moves
-        const freeSpaces = gameboard.getMoves();
-        let found = false;
-
-        for (let i = 0; i < freeSpaces.length; i++) {
-            // clone current game array
-            const tempArr = [...gameboard.getArray()];
-    
-            // check if p1 could win on next move and block
-            tempArr[freeSpaces[i]] = 'x';
-            // if p1 could win, go there
-            if (checkForWinner(tempArr, 'x')) {
-                gameboard.setSquare(freeSpaces[i], 'o');
-                found = true;
-                break;
-            }
-        }
+        let found = _attemptBlock();
         // if there is no situation where p1 or bot would win, choose a random square
         if (!found) {
             _chooseRandomSquare();
@@ -256,31 +286,9 @@ const botMove = (() => {
     };
 
     const medium = () => {
-        // find possible moves
-        const freeSpaces = gameboard.getMoves();
-        let found = false;
-
-        for (let i = 0; i < freeSpaces.length; i++) {
-            // clone current game array
-            const tempArr = [...gameboard.getArray()];
-    
-            // check if bot could win on next move
-            tempArr[freeSpaces[i]] = 'o';
-            // if o could win, go there
-            if (checkForWinner(tempArr, 'o')) {
-                gameboard.setSquare(freeSpaces[i], 'o');
-                found = true;
-                break;
-            }
-    
-            // check if p1 could win on next move
-            tempArr[freeSpaces[i]] = 'x';
-            // if p1 could win, go there
-            if (checkForWinner(tempArr, 'x')) {
-                gameboard.setSquare(freeSpaces[i], 'o');
-                found = true;
-                break;
-            }
+        let found = _attemptWin();
+        if (!found) {
+            found = _attemptBlock();
         }
         // if there is no situation where p1 or bot would win, choose a random square
         if (!found) {
@@ -298,27 +306,9 @@ const botMove = (() => {
             // choose center square if available
             gameboard.setSquare(4, game.getSymbol());
         } else {
-            for (let i = 0; i < freeSpaces.length; i++) {
-                // clone current game array
-                const tempArr = [...gameboard.getArray()];
-    
-                // check if bot could win on next move
-                tempArr[freeSpaces[i]] = 'o';
-                // if o could win, go there
-                if (checkForWinner(tempArr, 'o')) {
-                    gameboard.setSquare(freeSpaces[i], 'o');
-                    found = true;
-                    break;
-                }
-    
-                // check if p1 could win on next move
-                tempArr[freeSpaces[i]] = 'x';
-                // if p1 could win, go there
-                if (checkForWinner(tempArr, 'x')) {
-                    gameboard.setSquare(freeSpaces[i], 'o');
-                    found = true;
-                    break;
-                }
+            found = _attemptWin();
+            if (!found) {
+                found = _attemptBlock();
             }
             // if there is no situation where p1 or bot would win, choose a random square
             if (!found) {
@@ -328,5 +318,61 @@ const botMove = (() => {
         game.nextTurn();
     };
 
-    return {veryEasy, easy, medium, hard}
+    const minimax = (arr, depth = 0, symbol = 'o') => {
+
+        const nextSymbol = symbol === 'o' ? 'x' : 'o';
+        let bestIndex;
+        let bestScore = symbol === 'o' ? -Infinity : Infinity;
+
+        if (!arr.includes('')) return {bestIndex: null, bestScore: 0}
+
+        // check for bot winner
+        for (let i = 0; i < arr.length; i++) {
+            if (!arr[i]) {
+                arr[i] = symbol;
+                if (checkForWinner(arr, symbol)) {
+                    if (symbol === 'o') {
+                        let score = 10 - depth;
+                        bestScore = Math.max(score, bestScore);
+                        if (score === bestScore) {
+                            bestIndex = i;
+                        }
+                    } else {
+                        let score = depth - 10;
+                        bestScore = Math.min(score, bestScore);
+                        if (score === bestScore) {
+                            bestIndex = i;
+                        }
+                    }
+                } else {
+                    if (symbol === 'o') {
+                        let score = minimax(arr, depth + 1, nextSymbol).bestScore;
+                        bestScore = Math.max(score, bestScore);
+                        if (score === bestScore) {
+                            bestIndex = i;
+                        }
+                    } else {
+                        let score = minimax(arr, depth + 1, nextSymbol).bestScore;
+                        bestScore = Math.min(score, bestScore);
+                        if (score === bestScore) {
+                            bestIndex = i;
+                        }
+                    }
+                }
+                arr[i] = '';
+            }
+        }
+        return {bestIndex, bestScore}
+    };
+
+    const impossible = () => {
+        // copy current array
+        const arr = [...gameboard.getArray()];
+        const nextMove = minimax(arr);
+        gameboard.setSquare(nextMove.bestIndex, 'o');
+        console.log('------------------')
+        game.nextTurn();
+    }
+
+    return {veryEasy, easy, medium, hard, impossible}
 })()

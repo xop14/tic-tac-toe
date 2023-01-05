@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./styles.css">
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
     <title>Tic Tac Toe</title>
 </head>
 <body>
@@ -13,20 +14,22 @@
         <div class="bot-level-container">
             <label for="bot-level">Bot level</label>
             <select name="" id="bot-level">
-                <option value="easy">very easy</option>
+                <option value="very easy">very easy</option>
                 <option value="easy">easy</option>
                 <option value="medium">medium</option>
                 <option value="hard">hard</option>
+                <option value="impossible">impossible</option>
             </select>
         </div>
         <div class="scores">
             <div class="player">
-                <div class="p1-name">Player 1: </div>
-                <div class="p1-score">0</div>
+                <div class="p1-name name right">Player 1</div>
+                <div class="p1-score score right">0</div>
             </div>
+            <div class="score">-</div>
             <div class="player">
-                <div class="bot-name">Bot: </div>
-                <div class="bot-score">0</div>
+                <div class="bot-score score left">0</div>
+                <div class="bot-name name left">Bot</div>
             </div>
         </div>
         <div class="gameboard">
@@ -39,8 +42,10 @@
             <div class="square" data-index="6"></div>
             <div class="square" data-index="7"></div>
             <div class="square" data-index="8"></div>
+            <div class="display-container">
+                <div class="display"></div>
+            </div>
         </div>
-        <div class="display"></div>
         <button id="restart-btn">Restart</button>
     </div>
     <script src="./tictactoe.js"></script>
