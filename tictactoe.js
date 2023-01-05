@@ -1,4 +1,4 @@
-// player objects
+// player factory function
 function Player(name) {
     let _name = name;
     let _score = 0;
@@ -14,12 +14,12 @@ function Player(name) {
     return {getName, getScore, increaseScore, clearScore};
 }
 
+// player objects
 const p1 = new Player('Player 1');
 const bot = new Player('Bot');
 
 
-
-// gameboard
+// gameboard module
 const gameboard = (() => {
     const _arr = ['','','','','','','','',''];
     const _squares = document.querySelectorAll('.square');
@@ -61,6 +61,7 @@ const gameboard = (() => {
             square.classList.remove('square-win');
         })
     };
+    // use this for the winning squares animation 
     const setWinningSquares = (winningIndexArr) => {
         _winningSquares = winningIndexArr.sort();
     };

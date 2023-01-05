@@ -22,7 +22,8 @@
 body {
     min-height: 80vh;
     background-color: #fdfdfd;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     place-items: center;
 }
 
@@ -34,6 +35,7 @@ h1 {
     display: grid;
     place-items: center;
     padding: 20px;
+    margin-top: auto;
 }
 
 #bot-level {  /* Reset. */
@@ -185,4 +187,19 @@ button {
 button:hover {
     background-color: var(--btn-bg-color-hover);
     color: var(--btn-font-color-hover);
+}
+
+footer {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-bottom: 20px;
+    height: fit-content;
+}
+
+footer a {
+    color: var(--btn-bg-color);
+}
+
+footer a:hover {
+    color: var(--btn-bg-color-hover);
 }
