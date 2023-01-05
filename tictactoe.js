@@ -84,7 +84,7 @@ const game = (() => {
     let _currentSymbol = 'x';
     let _currentPlayer = p1;
     let _isGameOver = false;
-    let _botLevel = 'easy';
+    let _botLevel = 'medium';
     _botLevelSelect.value = _botLevel;
 
     // check if bot level stored locally
@@ -120,17 +120,22 @@ const game = (() => {
 
         // initiate bot move
         if (_currentPlayer === bot && _isGameOver === false) {
-            if (_botLevel === 'impossible') {
-                setTimeout(botMove.impossible, 200);
-            } else if (_botLevel === 'hard') {
-                setTimeout(botMove.hard, 200);
-            } else if (_botLevel === 'medium') {
-                setTimeout(botMove.medium, 200);
-            } else if (_botLevel === 'easy') {
-                setTimeout(botMove.easy, 200);
-            } else if (_botLevel === 'very easy') {
-                setTimeout(botMove.veryEasy, 200);
-            }
+            setTimeout(() => {
+                if (_botLevel === 'very easy') {
+                    botMove.move(3);
+                } else if (_botLevel === 'easy') {
+                    botMove.move(5);
+                } else if (_botLevel === 'medium') {
+                    botMove.move(7);
+                } else if (_botLevel === 'hard') {
+                    botMove.move(8);
+                } else if (_botLevel === 'very hard') {
+                    botMove.move(9);
+                } else if (_botLevel === 'impossible') {
+                    botMove.move(10);
+                }
+            }, 200);
+            
         }
     };
 
@@ -222,112 +227,29 @@ const display = (() => {
 
 // BOT MOVES
 const botMove = (() => {
+
     const _chooseRandomSquare = () => {
         // get possible moves
         const freeSpaces = gameboard.getMoves();
+        // choose one possible move at random
         const randomIndex = Math.floor(Math.random()*freeSpaces.length);
         gameboard.setSquare(freeSpaces[randomIndex], game.getSymbol());
     }
 
-    // check if bot can win on next move and go there
-    const _attemptWin = () => {
-        // get possible moves
-        const freeSpaces = gameboard.getMoves();
-        for (let i = 0; i < freeSpaces.length; i++) {
-            // clone current game array
-            const tempArr = [...gameboard.getArray()];
-            tempArr[freeSpaces[i]] = 'o';
-            // if o could win, go there
-            if (checkForWinner(tempArr, 'o')) {
-                gameboard.setSquare(freeSpaces[i], 'o');
-                return true;
-            }
-        }
-        return false;
-    };
-
-    // check if player can win on next move and block them
-    const _attemptBlock = () => {
-        // get possible moves
-        const freeSpaces = gameboard.getMoves();
-        for (let i = 0; i < freeSpaces.length; i++) {
-            // clone current game array
-            const tempArr = [...gameboard.getArray()];
-            tempArr[freeSpaces[i]] = 'x';
-            // if p1 could win, block them
-            if (checkForWinner(tempArr, 'x')) {
-                gameboard.setSquare(freeSpaces[i], 'o');
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // bot levels
-    const veryEasy = () => {
-        // get possible moves
-        const freeSpaces = gameboard.getMoves();
-    
-        // choose random space
-        const randomIndex = Math.floor(Math.random()*freeSpaces.length);
-        const botChoice = freeSpaces[randomIndex];
-        gameboard.setSquare(botChoice, game.getSymbol());
-        game.nextTurn();
-    };
-
-    const easy = () => {
-        let found = _attemptBlock();
-        // if there is no situation where p1 or bot would win, choose a random square
-        if (!found) {
-            _chooseRandomSquare();
-        }
-        game.nextTurn();
-
-    };
-
-    const medium = () => {
-        let found = _attemptWin();
-        if (!found) {
-            found = _attemptBlock();
-        }
-        // if there is no situation where p1 or bot would win, choose a random square
-        if (!found) {
-            _chooseRandomSquare();
-        }
-        game.nextTurn();
-    };
-
-    const hard = () => {
-        // find possible moves
-        const freeSpaces = gameboard.getMoves();
-        let found = false;
-    
-        if (freeSpaces.includes(4)) {
-            // choose center square if available
-            gameboard.setSquare(4, game.getSymbol());
-        } else {
-            found = _attemptWin();
-            if (!found) {
-                found = _attemptBlock();
-            }
-            // if there is no situation where p1 or bot would win, choose a random square
-            if (!found) {
-                _chooseRandomSquare();
-            }
-        }
-        game.nextTurn();
-    };
-
-    const minimax = (arr, depth = 0, symbol = 'o') => {
+    // minimax is a recursive algorithm that finds the optimal move
+    const _minimax = (arr, depth = 0, symbol = 'o') => {
 
         const nextSymbol = symbol === 'o' ? 'x' : 'o';
         let bestIndex;
+        // set default best score depending on current symbol being checked
         let bestScore = symbol === 'o' ? -Infinity : Infinity;
 
+        // return 0 is no free spaces
         if (!arr.includes('')) return {bestIndex: null, bestScore: 0}
 
-        // check for bot winner
+        // check for winner & return
         for (let i = 0; i < arr.length; i++) {
+            // check is space is empty and insert symbol if so
             if (!arr[i]) {
                 arr[i] = symbol;
                 if (checkForWinner(arr, symbol)) {
@@ -346,13 +268,13 @@ const botMove = (() => {
                     }
                 } else {
                     if (symbol === 'o') {
-                        let score = minimax(arr, depth + 1, nextSymbol).bestScore;
+                        let score = _minimax(arr, depth + 1, nextSymbol).bestScore;
                         bestScore = Math.max(score, bestScore);
                         if (score === bestScore) {
                             bestIndex = i;
                         }
                     } else {
-                        let score = minimax(arr, depth + 1, nextSymbol).bestScore;
+                        let score = _minimax(arr, depth + 1, nextSymbol).bestScore;
                         bestScore = Math.min(score, bestScore);
                         if (score === bestScore) {
                             bestIndex = i;
@@ -365,14 +287,20 @@ const botMove = (() => {
         return {bestIndex, bestScore}
     };
 
-    const impossible = () => {
-        // copy current array
-        const arr = [...gameboard.getArray()];
-        const nextMove = minimax(arr);
-        gameboard.setSquare(nextMove.bestIndex, 'o');
-        console.log('------------------')
+    const move = (level) => {
+        // generate random number from 0 - 10
+        let random = Math.round(Math.random(1)*10);
+
+        // choose random space if random number is higher than current level
+        // else play the ideal move using minimax
+        if (random > level) {
+            _chooseRandomSquare();
+        } else {
+            const arr = [...gameboard.getArray()];
+            gameboard.setSquare(_minimax(arr).bestIndex, 'o');
+        }
         game.nextTurn();
     }
 
-    return {veryEasy, easy, medium, hard, impossible}
+    return {move}
 })()
