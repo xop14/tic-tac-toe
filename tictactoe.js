@@ -39,7 +39,14 @@ const gameboard = (() => {
     const getSquare = index => _arr[index];
     const setSquare = (index, symbol) => {
         _arr[index] = symbol;
-        _squares[index].textContent = symbol;
+        let delay = 0;
+        // add slight delay before displaying bot's move
+        if (symbol === 'o') {
+            delay = 300;
+        }
+        setTimeout(() => {
+            _squares[index].textContent = symbol;
+        }, delay);
     };
     const getArray = () => _arr;
     const getMoves = () => {
@@ -66,11 +73,14 @@ const gameboard = (() => {
         _winningSquares = winningIndexArr.sort();
     };
     const animateSquares = () => {
-        for (let i = 0; i < 3; i++) {
-            setTimeout(() => {
-                _squares[_winningSquares[i]].classList.add('square-win');
-            }, 100 * i);
-        }
+        // add slight delay
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    _squares[_winningSquares[i]].classList.add('square-win');
+                }, 100 * i);
+            }
+        }, 300);
     };
 
     return {getSquare, setSquare, getArray, getMoves, setWinningSquares, animateSquares, clear};
@@ -121,22 +131,19 @@ const game = (() => {
 
         // initiate bot move
         if (_currentPlayer === bot && _isGameOver === false) {
-            setTimeout(() => {
-                if (_botLevel === 'very easy') {
-                    botMove.move(3);
-                } else if (_botLevel === 'easy') {
-                    botMove.move(5);
-                } else if (_botLevel === 'medium') {
-                    botMove.move(7);
-                } else if (_botLevel === 'hard') {
-                    botMove.move(8);
-                } else if (_botLevel === 'very hard') {
-                    botMove.move(9);
-                } else if (_botLevel === 'impossible') {
-                    botMove.move(10);
-                }
-            }, 200);
-            
+            if (_botLevel === 'very easy') {
+                botMove.move(3);
+            } else if (_botLevel === 'easy') {
+                botMove.move(5);
+            } else if (_botLevel === 'medium') {
+                botMove.move(7);
+            } else if (_botLevel === 'hard') {
+                botMove.move(8);
+            } else if (_botLevel === 'very hard') {
+                botMove.move(9);
+            } else if (_botLevel === 'impossible') {
+                botMove.move(10);
+            }
         }
     };
 
@@ -201,7 +208,7 @@ const display = (() => {
 
     const show = (message) => {
         _display.textContent = message;
-        let interval = 500;
+        let interval = 1200;
         // set shorter interval time if tie
         if (message.includes('tie')) {
             interval = 200;
